@@ -8,6 +8,13 @@ A script to rename project created by KiCad(5).
 # [create-rails-mysql-docker-project.sh](./create-rails-mysql-docker-project.sh)
 A script to create rails mysql docker project.
 
+# [setup-icestorm.sh](./setup-icestorm.sh)
+A script to create icestorm environment for lattice FPGA.
+
+[Project IceStorm](http://www.clifford.at/icestorm/)
+[Raspberry Pi上にFPGA開発環境を構築する](http://cellspe.matrix.jp/zerofpga/sjr_ice.html)
+[How to set up swap space?](https://raspberrypi.stackexchange.com/questions/70/how-to-set-up-swap-space)
+
 # License
 MIT
 
