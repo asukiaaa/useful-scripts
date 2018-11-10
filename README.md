@@ -2,9 +2,11 @@
 
 This project manages my scripts to do some job.
 
-Name | Role
----- | ----
-[rename-kicad-project.sh](./rename-kicad-project.sh) | A script to rename project created by KiCad(5).
+# [rename-kicad-project.sh](./rename-kicad-project.sh)
+A script to rename project created by KiCad(5).
+
+# [create-rails-mysql-docker-project.sh](./create-rails-mysql-docker-project.sh)
+A script to create rails mysql docker project.
 
 # License
 MIT
