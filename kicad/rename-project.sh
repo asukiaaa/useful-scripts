@@ -9,10 +9,17 @@ fi
 
 NEW_NAME=$1
 
-for file in *.pro
+for file in `ls *.pro`
 do
+  # echo $file
   OLD_NAME=${file/.pro/}
+  # echo $OLD_NAME
 done
+
+if [[ $OLD_NAME = "" ]]; then
+    echo "cannot find kicad project"
+    exit 1
+fi
 
 echo rename $OLD_NAME as $NEW_NAME
 FILES=`find . -type f -not -iwholename '*.git/*' | grep $OLD_NAME`
