@@ -1,25 +1,31 @@
 #!/bin/bash
 
-if [[ $1 = "" || $2 = "" ]]; then
+# if [[ $1 = "" || $2 = "" ]]; then
+if [[ $1 = "" ]]; then
   echo "Please execute like this.
-$0 current_project_name new_project_name"
+$0 new_project_name"
   exit 1
 fi
 
-FROM=$1
-TO=$2
+NEW_NAME=$1
 
-FILES=`find . -type f -not -iwholename '*.git/*' | grep $FROM`
+for file in *.pro
+do
+  OLD_NAME=${file/.pro/}
+done
+
+echo rename $OLD_NAME as $NEW_NAME
+FILES=`find . -type f -not -iwholename '*.git/*' | grep $OLD_NAME`
 for file in $FILES
 do
-  toFile=${file/$FROM/$TO}
+  toFile=${file/$OLD_NAME/$NEW_NAME}
   mv $file $toFile
   echo moved $file as $toFile
 done
-echo replace $FROM as $TO in these files
-FILES=`find . -type f -not -iwholename '*.git/*' | xargs egrep -lir $FROM`
+echo replace $OLD_NAME as $NEW_NAME in these files
+FILES=`find . -type f -not -iwholename '*.git/*' | xargs egrep -lir $OLD_NAME`
 for file in $FILES
 do
   echo $file
-  sed -i -e "s/${FROM}/${TO}/g" $file
+  sed -i -e "s/${OLD_NAME}/${NEW_NAME}/g" $file
 done
