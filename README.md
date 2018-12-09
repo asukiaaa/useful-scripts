@@ -2,13 +2,13 @@
 
 This project manages my scripts to do some job.
 
-# [rename-kicad-project.sh](./rename-kicad-project.sh)
+# [kicad/rename-project.sh](./kicad/rename-project.sh)
 A script to rename project created by KiCad(5).
 
-# [create-rails-mysql-docker-project.sh](./create-rails-mysql-docker-project.sh)
+# [docker/create-rails-mysql-project.sh](./docker/create-rails-mysql-project.sh)
 A script to create rails mysql docker project.
 
-# [setup-icestorm.sh](./setup-icestorm.sh)
+# [icestorm/setup.sh](./icestorm/setup.sh)
 A script to create icestorm environment for lattice FPGA.
 
 [Project IceStorm](http://www.clifford.at/icestorm/)
