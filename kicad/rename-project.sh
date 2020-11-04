@@ -22,7 +22,7 @@ if [[ $OLD_NAME = "" ]]; then
 fi
 
 echo rename $OLD_NAME as $NEW_NAME
-FILES=`find . -type f -not -iwholename '*.git/*' | grep $OLD_NAME`
+FILES=`find . -type f -not -iwholename '*.git/*' -not -iwholename '*/.git' | grep $OLD_NAME`
 for file in $FILES
 do
   toFile=${file/$OLD_NAME/$NEW_NAME}
@@ -30,7 +30,7 @@ do
   echo moved $file as $toFile
 done
 echo replace $OLD_NAME as $NEW_NAME in these files
-FILES=`find . -type f -not -iwholename '*.git/*' | xargs egrep -lir $OLD_NAME`
+FILES=`find . -type f -not -iwholename '*.git/*' -not -iwholename '*/.git' | xargs egrep -lir $OLD_NAME`
 for file in $FILES
 do
   echo $file
