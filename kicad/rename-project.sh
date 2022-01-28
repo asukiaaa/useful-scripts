@@ -9,12 +9,21 @@ fi
 
 NEW_NAME=$1
 
-for file in `ls *.pro`
+for file in `ls *.pro` # KiCad5
 do
   # echo $file
   OLD_NAME=${file/.pro/}
   # echo $OLD_NAME
 done
+
+if [[ $OLD_NAME = "" ]]; then
+for file in `ls *.kicad_pro` # KiCad6
+do
+  # echo $file
+  OLD_NAME=${file/.kicad_pro/}
+  # echo $OLD_NAME
+done
+fi
 
 if [[ $OLD_NAME = "" ]]; then
     echo "cannot find kicad project"
