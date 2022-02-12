@@ -18,3 +18,5 @@ network={
     psk=\"$2\"
 }
 " | tee --append /media/$USER/boot/wpa_supplicant.conf > /dev/null
+
+sync

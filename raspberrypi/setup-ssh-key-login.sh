@@ -23,3 +23,5 @@ chmod 600 $HOME_DIR/.ssh/authorized_keys
 cat $1 >> $HOME_DIR/.ssh/authorized_keys
 
 sudo sed -i -e "s/#PasswordAuthentication yes/PasswordAuthentication no/g" $HOME_DISC/etc/ssh/sshd_config
+
+sync
