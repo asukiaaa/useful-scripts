@@ -9,4 +9,7 @@ $0 /dev/mmcblk0 ./raspbianImages/2019-07-10-raspbian-buster.img"
   exit 1
 fi
 
-dd bs=4M of=$1 if=$2 conv=fsync
+umount $1*
+
+du $2 -h
+dd bs=4M of=$1 if=$2 conv=fsync status=progress
