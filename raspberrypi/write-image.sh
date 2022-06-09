@@ -13,3 +13,4 @@ umount $1*
 
 du $2 -h
 dd bs=4M of=$1 if=$2 conv=fsync status=progress
+sync
