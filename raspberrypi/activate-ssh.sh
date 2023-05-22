@@ -1,3 +1,3 @@
 #!/bin/sh
 
-touch /media/$USER/boot/ssh
+touch `./get-path-bootfs.sh`/ssh

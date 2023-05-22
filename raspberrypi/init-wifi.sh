@@ -17,6 +17,6 @@ network={
     ssid=\"$1\"
     psk=\"$2\"
 }
-" | tee --append /media/$USER/boot/wpa_supplicant.conf > /dev/null
+" | tee --append `./get-path-bootfs.sh`/wpa_supplicant.conf > /dev/null
 
 sync
