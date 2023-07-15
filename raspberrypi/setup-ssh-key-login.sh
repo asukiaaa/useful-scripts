@@ -11,8 +11,9 @@ fi
 
 sudo -v
 
-HOME_DISC=/media/$USER/rootfs
-HOME_DIR=$HOME_DISC/home/pi
+HOME_DIR=`./get-path-home-dir.sh`
+HOME_DISC=`realpath $HOME_DIR/../../`
+
 touch `./get-path-bootfs.sh`/ssh
 
 # ref: https://asukiaaa.blogspot.com/2021/09/raspberrypi-ssh-login-with-using-public-key.html

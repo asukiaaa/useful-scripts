@@ -8,5 +8,3 @@ if [ -d $PATH_BOOT ]; then
 elif [ -d $PATH_BOOTFS ]; then
   echo $PATH_BOOTFS
 fi
-
-exit 1
