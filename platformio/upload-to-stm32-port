@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ "$1" = "" ]; then
+  echo "Please execute with path of stm32 serial port.
+$0 port
+
+Example:
+$0 /dev/ttyACM0"
+  exit 1
+fi
+
+PORT=$1
+SERIAL_RAW=$(udevadm info $PORT | grep SERIAL_SHORT=)
+SERIAL=${SERIAL_RAW#*=}
+# echo $SERIAL
+# echo "${@:2}"
+
+PLATFORMIO_UPLOAD_FLAGS="-cadapter serial $SERIAL" pio run -t upload ${@: 2}
