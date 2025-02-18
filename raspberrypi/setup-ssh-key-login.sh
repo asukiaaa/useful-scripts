@@ -1,5 +1,7 @@
 #!/bin/sh
 
+DIR_HERE=$(dirname $(realpath $0))
+
 if [ "$1" = "" ]; then
   echo "Please execute with ssh public key
 $0 public_key_file
@@ -11,10 +13,10 @@ fi
 
 sudo -v
 
-HOME_DIR=`./get-path-home-dir.sh`
+HOME_DIR=`$DIR_HERE/get-path-home-dir.sh`
 HOME_DISC=`realpath $HOME_DIR/../../`
 
-touch `./get-path-bootfs.sh`/ssh
+touch `$DIR_HERE/get-path-bootfs.sh`/ssh
 
 # ref: https://asukiaaa.blogspot.com/2021/09/raspberrypi-ssh-login-with-using-public-key.html
 

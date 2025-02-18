@@ -1,5 +1,7 @@
 #!/bin/sh
 
+DIR_HERE=$(dirname $(realpath $0))
+
 if [ "$1" = "" ] || [ "$2" = "" ]; then
   echo "Please execute with ssid device and pass.
 $0 ssid pass
@@ -17,6 +19,6 @@ network={
     ssid=\"$1\"
     psk=\"$2\"
 }
-" | tee --append `./get-path-bootfs.sh`/wpa_supplicant.conf > /dev/null
+" | tee --append `$DIR_HERE/get-path-bootfs.sh`/wpa_supplicant.conf > /dev/null
 
 sync

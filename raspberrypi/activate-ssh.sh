@@ -1,3 +1,5 @@
 #!/bin/sh
 
-touch `./get-path-bootfs.sh`/ssh
+DIR_HERE=$(dirname $(realpath $0))
+
+touch `$DIR_HERE/get-path-bootfs.sh`/ssh
