@@ -1,0 +1,204 @@
+import FreeCADGui
+import FreeCAD
+import TechDraw
+import time
+import math
+
+def put_part_as_view_in_direction(page, part, direction, xdirection):
+    view = page.Document.addObject('TechDraw::DrawProjGroupItem', 'View')
+    # view.translateLabel('DrawProjGroupItem', 'View', 'View')
+    page.addView(view)
+    view.Source = part
+    view.Direction = direction # FreeCAD.Vector(0, 0, 1)
+    view.RotationVector = FreeCAD.Vector(1, 0, 0)
+    view.XDirection = xdirection # FreeCAD.Vector(1, 0, 0)
+    view.recompute()
+    return view
+
+def put_part_xy_side_as_view(page, part):
+    return put_part_as_view_in_direction(page, part, FreeCAD.Vector(0, 0, 1), FreeCAD.Vector(1, 0, 0))
+
+def put_part_xz_side_as_view(page, part):
+    return put_part_as_view_in_direction(page, part, FreeCAD.Vector(0, -1, 0), FreeCAD.Vector(1, 0, 0))
+
+def put_part_yz_side_as_view(page, part):
+    return put_part_as_view_in_direction(page, part, FreeCAD.Vector(-1, 0, 0), FreeCAD.Vector(0, 1, 0))
+
+def update_max_min(val, max, min):
+    if max is None:
+        max = val
+    elif max < val:
+        max = val
+    if min is None:
+        min = val
+    elif min > val:
+        min = val
+    return (max, min)
+
+def normalize_degree360(deg):
+    return deg % 360
+
+def get_degree360_of_point(point, center):
+    # print(point)
+    # print(center)
+    x = point.x - center.x
+    y = point.y - center.y
+    # print("x = %s y = %s" %(x, y))
+    if x == 0:
+       return -90 if y < 0 else 90
+    deg = math.atan(y/x) / math.pi * 180
+    # print(deg)
+    if x < 0:
+        deg += 180
+    return normalize_degree360(deg)
+
+def has_line_on_degree360(deg_target, deg_start, deg_end):
+    deg_target = normalize_degree360(deg_target)
+    deg_start = normalize_degree360(deg_start)
+    deg_end = normalize_degree360(deg_end)
+    if deg_start < deg_end:
+        return deg_start <= deg_target and deg_target <= deg_end
+    else:
+        return deg_target <= deg_start or deg_end <= deg_target
+
+def get_xy_max_min_of_edge_circle(edge):
+    c = edge.Curve.Center
+    r = edge.Curve.Radius
+    edge_x_max = None
+    edge_x_min = None
+    edge_y_max = None
+    edge_y_min = None
+    if edge.Closed:
+        edge_x_max = c.x + r
+        edge_x_min = c.x - r
+        edge_y_max = c.y + r
+        edge_y_min = c.y - r
+    else:
+        if edge.Vertexes[0].Orientation == "Forward":
+            point_cw_end = edge.Vertexes[0].Point
+            point_cw_start = edge.Vertexes[1].Point
+        else:
+            point_cw_end = edge.Vertexes[1].Point
+            point_cw_start = edge.Vertexes[0].Point
+        edge_x_max = max(point_cw_start.x, point_cw_end.x)
+        edge_x_min = min(point_cw_start.x, point_cw_end.x)
+        edge_y_max = max(point_cw_start.y, point_cw_end.y)
+        edge_y_min = min(point_cw_start.y, point_cw_end.y)
+        deg_cw_start = get_degree360_of_point(point_cw_start, c)
+        deg_cw_end = get_degree360_of_point(point_cw_end, c)
+        if has_line_on_degree360(0, deg_cw_start, deg_cw_end):
+            edge_x_max = c.x + r
+        if has_line_on_degree360(90, deg_cw_start, deg_cw_end):
+            edge_y_max = c.y + r
+        if has_line_on_degree360(180, deg_cw_start, deg_cw_end):
+            edge_x_min = c.x - r
+        if has_line_on_degree360(270, deg_cw_start, deg_cw_end):
+            edge_y_min = c.y - r
+    return ((edge_x_max, edge_y_max), (edge_x_min, edge_y_min))
+
+def calc_size_xy_of_view(view):
+    x_max = None
+    x_min = None
+    y_max = None
+    y_min = None
+    for edge in view.getVisibleEdges():
+        typeId = edge.Curve.TypeId
+        if typeId == "Part::GeomCircle":
+            ((edge_x_max, edge_y_max), (edge_x_min, edge_y_min)) = get_xy_max_min_of_edge_circle(edge)
+            (x_max, x_min) = update_max_min(edge_x_max, x_max, x_min)
+            (x_max, x_min) = update_max_min(edge_x_min, x_max, x_min)
+            (y_max, y_min) = update_max_min(edge_y_max, y_max, y_min)
+            (y_max, y_min) = update_max_min(edge_y_min, y_max, y_min)
+        else:
+            for vec in edge.Vertexes:
+                p = vec.Point
+                (x_max, x_min) = update_max_min(p.x, x_max, x_min)
+                (y_max, y_min) = update_max_min(p.y, y_max, y_min)
+    size_x = x_max - x_min if x_max is not None and x_min is not None else None
+    size_y = y_max - y_min if y_max is not None and y_min is not None else None
+    return (size_x, size_y)
+
+def export_view_to_dxf(view, retry_count = 3):
+    size_xy = calc_size_xy_of_view(view)
+    if size_xy[0] is None:
+        if retry_count > 0:
+            view.recompute()
+            FreeCADGui.updateGui()
+            return export_view_to_dxf(view, retry_count - 1)
+        else:
+            print("cannot calc size of %s" % label)
+            return
+    label = view.Source[0].Label
+    path_file = os.path.join(dir_export, "%s_%.1fx%.1fmm.dxf" % (label, size_xy[0], size_xy[1]))
+    TechDraw.writeDXFView(view, path_file)
+    return path_file
+
+# def export_page_to_dxf(page, name):
+#     import TechDraw
+#     path_file = os.path.join(dir_export, name + ".dxf")
+#     TechDraw.writeDXFPage(page, path_file)
+
+def main():
+    name_process = "export dxf from shape"
+    print("start: %s" % name_process)
+    doc = FreeCAD.activeDocument()
+
+    dir_export = os.path.join(os.path.dirname(doc.FileName), "exported_dxf")
+    os.makedirs(dir_export, exist_ok=True)
+
+    template = doc.addObject('TechDraw::DrawSVGTemplate', 'Template')
+    template.Template = os.path.join(FreeCAD.getHomePath(), "share/Mod/TechDraw/Templates/Default_Template_A4_Landscape.svg")
+    page = doc.addObject('TechDraw::DrawPage', 'page_plates')
+    page.Template = template
+
+    views_to_export = []
+
+    name_group_and_fnc_put_view = [
+        ("export_xy_as_dxf", put_part_xy_side_as_view),
+        ("export_xz_as_dxf", put_part_xz_side_as_view),
+        ("export_yz_as_dxf", put_part_yz_side_as_view),
+    ]
+
+    for (name_group_export, fnc_put_part) in name_group_and_fnc_put_view:
+        objects_of_group = doc.getObjectsByLabel(name_group_export)
+        for object in objects_of_group:
+            for part in object.Group:
+                view = fnc_put_part(page, part)
+                views_to_export.append(view)
+
+    # App.getDocument(doc.Name).recompute()
+    # doc.recompoute()
+    # time.sleep(1)
+    FreeCADGui.updateGui() # https://forum.freecad.org/viewtopic.php?style=1&t=81587
+    # updateGuiはfreecad.cmdでは動かん
+    # srouceはここ
+    # https://github.com/FreeCAD/FreeCAD/blob/d55d8d1dac87bfd6f3e13a62140ee43dfe54e80e/src/Gui/ApplicationPy.cpp#L984
+    # processEventsを呼べれば良さそう
+    # refreshでも良さそうだが、FreeCADに無い https://github.com/FreeCAD/FreeCAD/blob/d55d8d1dac87bfd6f3e13a62140ee43dfe54e80e/src/Base/Console.cpp#L378
+
+    # https://forum.freecad.org/viewtopic.php?t=29865
+    # これでも良い
+    # from PySide import QtCore,QtGui
+    # QtGui.QApplication.processEvents()
+
+    for view in views_to_export:
+        # view.recompute()
+        path_file = export_view_to_dxf(view)
+        print("Created %s" % path_file)
+        # export_page_to_dxf(page, view.Source[0].Name)
+
+    for view in page.getAllViews():
+        doc.removeObject(view.Label)
+
+    FreeCAD.activeDocument().removeObject(page.Label)
+    # doc.removeObject(page.Label)
+    print("end: %s" % name_process)
+
+if __name__ == '__main__':
+    main()
+
+# https://forum.freecad.org/viewtopic.php?t=13403
+# mw = FreeCADGui.getMainWindow()
+# mw.deleteLater()
+# print("call close")
+# mw.close()
