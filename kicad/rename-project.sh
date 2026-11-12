@@ -31,8 +31,8 @@ if [[ $OLD_NAME = "" ]]; then
 fi
 
 FIND_CANDIDATE_FILES="find . -type f \
-  -not -path */.git/* \
-  -not -path */gerber_to_order/*"
+  -not -path '*/.git/*( \
+  -not -path '*/gerber_to_order/*'"
 
 echo rename $OLD_NAME as $NEW_NAME
 FILES=`$FIND_CANDIDATE_FILES | grep $OLD_NAME`
