@@ -30,8 +30,12 @@ if [[ $OLD_NAME = "" ]]; then
     exit 1
 fi
 
+FIND_CANDIDATE_FILES="find . -type f \
+  -not -path */.git/* \
+  -not -path */gerber_to_order/*"
+
 echo rename $OLD_NAME as $NEW_NAME
-FILES=`find . -type f -not -iwholename '*.git/*' -not -iwholename '*/.git' | grep $OLD_NAME`
+FILES=`$FIND_CANDIDATE_FILES | grep $OLD_NAME`
 for file in $FILES
 do
   toFile=${file/$OLD_NAME/$NEW_NAME}
@@ -39,7 +43,7 @@ do
   echo moved $file as $toFile
 done
 echo replace $OLD_NAME as $NEW_NAME in these files
-FILES=`find . -type f -not -iwholename '*.git/*' -not -iwholename '*/.git' | xargs egrep -lir $OLD_NAME`
+FILES=`$FIND_CANDIDATE_FILES | xargs egrep -lir $OLD_NAME`
 for file in $FILES
 do
   echo $file
